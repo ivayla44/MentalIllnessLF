@@ -1,18 +1,33 @@
 import {db} from "@/lib/db";
+import {useState} from "react";
 
 function createPost() {
-  return (
-      <div>
+    const [title, setTitle] = useState("");
+    const [content, setContent] = useState("");
+
+    return (
+        <div>
         <h1>Create post</h1>
         <form>
-          <label htmlFor="title">Title</label>
-          <input type="text" id="title" name="title" />
+            <label htmlFor="title">Title</label>
+            <input type="text" id="title" name="title" onChange={event => setTitle(event.target.value)} value={title}/>
 
-          <label htmlFor="content">Content</label>
-          <textarea id="content" name="content" />
+            <label htmlFor="content">Content</label>
+            <textarea id="content" name="content" onChange={event => setContent(event.target.value)} value={content}/>
+
+            <button type="submit" onClick={ async () => {
+                const res = await fetch("/api/posts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({title, content})
+                });
+                const post = await res.json();
+            }}>Create post</button>
         </form>
-      </div>
-  )
+        </div>
+    )
 }
 
 export default function Home({myPosts, friendsPosts}) {
@@ -25,7 +40,7 @@ export default function Home({myPosts, friendsPosts}) {
         <div>{createPost()}</div>
 
         <h2>View my posts</h2>
-          <div>
+            <div>
               {myPosts !== null ? (
                   myPosts.map((post) => (
                       <div key={post.id}>
@@ -36,10 +51,10 @@ export default function Home({myPosts, friendsPosts}) {
               ) : (
                   <p>No posts available.</p>
               )}
-          </div>
+            </div>
 
         <h2>View feed</h2>
-          <div>
+            <div>
               {friendsPosts !== null ? (
                   friendsPosts.map((post) => (
                       <div key={post.id}>
@@ -50,7 +65,7 @@ export default function Home({myPosts, friendsPosts}) {
               ) : (
                   <p>No feed posts available.</p>
               )}
-          </div>
+            </div>
       </div>
   )
 }
