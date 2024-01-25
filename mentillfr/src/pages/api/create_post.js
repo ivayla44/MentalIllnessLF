@@ -14,8 +14,6 @@ export default async function handler(req, res) {
     `, [title, content]
     );
 
-    console.log(lastID);
-
     const post = await db.get(`SELECT * FROM posts WHERE id = ?`, [lastID]);
 
     res.json(post);
