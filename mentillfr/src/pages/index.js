@@ -79,9 +79,18 @@ export default function Home({myPosts, friendsPosts}) {
 
 export async function getServerSideProps(context) {
     // TODO: shte vidim kak shte vzimame id-tata, ig nqkakuv session/cookie-ta not sure yet
-    const currentUserID = 1;
+    const { currentUserID } = context.req.session || {};
 
     try {
+        if (!currentUserID) {
+            return {
+                redirect: {
+                    destination: '/login',
+                    permanent: false,
+                },
+            };
+        }
+
         const myPosts = await db.get(`
         SELECT *
         FROM posts
