@@ -34,6 +34,13 @@ export default function Home({myPosts, friendsPosts}) {
   return (
       <div>
         <h1>Home Page</h1>
+        <Link href="/login">
+            <a>Login</a>
+        </Link>
+        <br />
+        <Link href="/signup">
+            <a>Signup</a>
+        </Link>
 
         <div>Take quizzes</div>
 
