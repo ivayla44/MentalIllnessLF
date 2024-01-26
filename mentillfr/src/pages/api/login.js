@@ -1,10 +1,8 @@
 // pages/api/login.js
 
 import { db } from '@/lib/db.js';
-import bcrypt from 'bcrypt'; // Import bcrypt for password hashing
-import jwt from 'jsonwebtoken'; // Import jsonwebtoken for JWT token generation
-
-const SECRET_KEY = 'iva_e_mnogo_qka'; // Set a secret key for JWT
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -20,12 +18,16 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
-  // Generate a JWT token upon successful login
-  const token = jwt.sign({ userId: user.id, username: user.username }, SECRET_KEY, {
-    expiresIn: '1h', // Token expires in 1 hour (adjust as needed)
+  const session = crypto.randomBytes(16).toString('base64');
+  res.setHeader("Set-Cookie", [`session=${session}; HttpOnly; Path=/`, `user=${user.id}; HttpOnly; Path=/`]);
+
+  console.log("Successfull login", user.id);
+
+  res.status(200).json({
+    user: {
+      id: user.id,
+      username: user.username,
+    },
+    session: session,
   });
-
-  console.log("Successfull login", token);
-
-  res.status(200).json(token);
 }

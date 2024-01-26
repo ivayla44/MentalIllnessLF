@@ -6,15 +6,26 @@ export default async function handler(req, res) {
         return;
     }
 
-    const { title, content } = req.body;
+    const { userId, title, content } = req.body;
 
-    const { lastID } = await db.run(`
-        INSERT INTO posts (title, content)
-        VALUES (?, ?)
-    `, [title, content]
-    );
+    try {
+        if (!userId) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
 
-    const post = await db.get(`SELECT * FROM posts WHERE id = ?`, [lastID]);
+        const { lastID } = await db.run(`
+            INSERT INTO posts (user_id, title, content)
+            VALUES (?, ?, ?)
+        `, [userId, title, content]
+        );
 
-    res.json(post);
+        const post = await db.get(`SELECT * FROM posts WHERE id = ?`, [lastID]);
+
+        res.json(post);
+
+    } catch (error) {
+            console.error('Error creating post:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
+    }
 }

@@ -17,21 +17,15 @@ const Login = () => {
       });
 
       if (response.ok) {
-        // Assuming the backend returns a token upon successful login
-        const { token } = await response.json();
+        const { user, session } = await response.json();
 
-        // Store the token in a secure way (e.g., localStorage) for future requests
-        localStorage.setItem('token', token);
+        document.cookie = `user=${user}, session=${session}`;
 
-        // Redirect to a protected route or homepage
-        // You can use Next.js router for navigation
         await router.push('/');
 
 
       } else {
         console.error('Login failed');
-
-        // Handle login failure (e.g., display an error message)
       }
     } catch (error) {
       console.error('Error during login:', error);

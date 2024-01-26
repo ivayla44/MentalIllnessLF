@@ -1,10 +1,10 @@
 import {db} from "@/lib/db";
 import {useState} from "react";
-import jwt from "jsonwebtoken";
 
-const SECRET_KEY = 'iva_e_mnogo_qka'; // Set a secret key for JWT
+const users = {}
 
-function createPost() {
+
+function createPost({userId}) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
 
@@ -19,70 +19,94 @@ function createPost() {
             <textarea id="content" name="content" onChange={event => setContent(event.target.value)} value={content}/>
 
             <button type="submit" onClick={ async () => {
-                const res = await fetch("/api/posts", {
+                const res = await fetch("/api/create_post", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({title, content})
+                    body: JSON.stringify({userId, title, content}),
                 });
-                // const post = await res.json();
+                if (res.ok) {
+                    const post = await res.json();
+                    console.log("Post created successfully:", post);
+                } else {
+                    console.error("Error creating post:", res.statusText);
+                }
             }}>Create post</button>
         </form>
         </div>
     )
 }
 
-export default function Home({myPosts, friendsPosts}) {
+export default function Home({userId, myPosts, friendsPosts}) {
   return (
       <div>
 
         <div>Take quizzes</div>
 
-        <div>{createPost()}</div>
+        <div>{createPost({ userId })}</div>
 
-        <h2>View my posts</h2>
-            <div>
+      <h2>View my posts</h2>
+          <div>
               {myPosts !== null ? (
-                  myPosts.map((post) => (
-                      <div key={post.id}>
-                          <div>{post.title}</div>
-                          <div>{post.content}</div>
+                  Array.isArray(myPosts) ? (
+                      myPosts.map((post) => (
+                          <div key={post.id}>
+                              <div>{post.title}</div>
+                              <div>{post.content}</div>
+                          </div>
+                      ))
+                  ) : (
+                      <div key={myPosts.id}>
+                          <div>{myPosts.title}</div>
+                          <div>{myPosts.content}</div>
                       </div>
-                  ))
+                  )
               ) : (
                   <p>No posts available.</p>
               )}
-            </div>
+          </div>
 
-        <h2>View feed</h2>
-            <div>
+          <h2>View feed</h2>
+          <div>
               {friendsPosts !== null ? (
-                  friendsPosts.map((post) => (
-                      <div key={post.id}>
-                          <div>{post.title}</div>
-                          <div>{post.content}</div>
+                  Array.isArray(friendsPosts) ? (
+                      friendsPosts.map((post) => (
+                          <div key={post.id}>
+                              <div>{post.title}</div>
+                              <div>{post.content}</div>
+                          </div>
+                      ))
+                  ) : (
+                      <div key={friendsPosts.id}>
+                          <div>{friendsPosts.title}</div>
+                          <div>{friendsPosts.content}</div>
                       </div>
-                  ))
+                  )
               ) : (
                   <p>No feed posts available.</p>
               )}
-            </div>
+          </div>
       </div>
   )
 }
 
 export async function getServerSideProps(context) {
-    // TODO: shte vidim kak shte vzimame id-tata, ig nqkakuv session/cookie-ta not sure yet
 
     try {
-        const token = localStorage.getItem("token") || {};
-        const decoded = jwt.verify(token, SECRET_KEY);
-        const userId = decoded.userId || {};
+        const { req } = context;
+        const session = req.cookies.session;
+        const user = req.cookies.user;
+
+        if(!users[session]) {
+            users[session] = user;
+        }
+        const userId = users[session];
+
+        console.log("User id:", userId, "Session:", session)
 
         if (!userId) {
             console.log("Redirecting to login page...");
-
             return {
                 redirect: {
                     destination: '/login',
@@ -97,6 +121,9 @@ export async function getServerSideProps(context) {
         WHERE user_id = ?;
     `, [userId]);
 
+        console.log("My posts:", myPosts);
+        console.log(Array.isArray(myPosts));
+
         const friendsPosts = await db.get(`
         SELECT posts.*
         FROM posts
@@ -106,6 +133,7 @@ export async function getServerSideProps(context) {
 
         return {
             props: {
+                userId: userId || null,
                 myPosts: myPosts || null,
                 friendsPosts: friendsPosts || null,
             },
@@ -115,6 +143,7 @@ export async function getServerSideProps(context) {
 
         return {
             props: {
+                userId: null,
                 myPosts: null,
                 friendsPosts: null,
             },

@@ -18,12 +18,10 @@ const Signup = () => {
       });
 
       if (response.ok) {
-        // Assuming the backend returns a success message
         const { message } = await response.json();
           await router.push("/login");
       } else {
     console.error('Signup failed');
-        // Handle signup failure (e.g., display an error message)
       }
     } catch (error) {
       console.error('Error during signup:', error);
