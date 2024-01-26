@@ -42,6 +42,26 @@ export default function Home({userId, myPosts, friendsPosts}) {
   return (
       <div>
 
+        {/* Search bar */}
+        <input
+            type="text"
+            placeholder="Search for users"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button onClick={handleSearch}>Search</button>
+
+        <br />
+        
+        {/* Links to login and signup */}
+        <Link href="/login">
+            <a>Login</a>
+        </Link>
+        <br />
+        <Link href="/signup">
+            <a>Signup</a>
+        </Link>
+        
         <div>Take quizzes</div>
 
         <div>{createPost({ userId })}</div>
