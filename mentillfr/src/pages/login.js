@@ -1,5 +1,6 @@
 import {useState} from 'react';
 import {useRouter} from "next/router";
+import Link from "next/link";
 
 const Login = () => {
     const router = useRouter();
@@ -41,6 +42,7 @@ const Login = () => {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
+
       <input
         type="password"
         placeholder="Password"
@@ -48,6 +50,9 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button onClick={handleLogin}>Login</button>
+
+            <Link href="/signup">Signup</Link>
+
     </div>
   );
 };

@@ -1,21 +1,42 @@
 // pages/user/[userId].js
-import { useRouter } from 'next/router';
-import {db} from "@/lib/db";
+import { db } from '@/lib/db';
 
-const UserProfilePage = ({ user, areFriends }) => {
-  const router = useRouter();
+const UserProfilePage = ({ user, areFriends, currentUser }) => {
+  const handleAddFriend = async () => {
+    try {
+      const response = await fetch(`/api/addFriend?user1Id=${currentUser.id}&user2Id=${user.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user1Id: currentUser.id, user2Id: user.id }),
+      });
+
+      if (response.ok) {
+        // Assuming the friend request was successful, you might want to update the UI accordingly
+        console.log('Friend request sent successfully');
+      } else {
+        console.error('Friend request failed');
+      }
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+    }
+  };
 
   return (
-    <div>
-      <h1>User Profile</h1>
-      <p>Username: {user.username}</p>
+      <div>
+        <h1>User Profile</h1>
+        <p>Username: {user.username}</p>
 
-      {areFriends ? (
-        <p>This user is already your friend.</p>
-      ) : (
-        <p>Not friends yet. Add as a friend!</p>
-      )}
-    </div>
+        {areFriends ? (
+            <p>This user is already your friend.</p>
+        ) : (
+            <div>
+              <p>Not friends yet.</p>
+              <button onClick={handleAddFriend}>Add as a friend</button>
+            </div>
+        )}
+      </div>
   );
 };
 
@@ -28,16 +49,13 @@ export async function getServerSideProps(context) {
   const { userId } = context.query;
   const currentUserID = req.cookies.user;
 
-
   try {
-
     const response = await fetch(`${baseUrl}/api/areFriends?user1Id=${currentUserID}&user2Id=${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-
 
     const data = await response.json();
     const areFriends = data.areFriends;
@@ -51,6 +69,9 @@ export async function getServerSideProps(context) {
           username: user.username,
         },
         areFriends,
+        currentUser: {
+            id: currentUserID,
+        },
       },
     };
   } catch (error) {

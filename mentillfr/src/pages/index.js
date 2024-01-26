@@ -1,6 +1,5 @@
 import {db} from "@/lib/db";
 import {useState} from "react";
-import Link from "next/link";
 import {useRouter} from "next/router";
 
 const users = {}
@@ -92,15 +91,6 @@ export default function Home({userId, myPosts, friendsPosts}) {
         />
         <button onClick={handleSearch}>Search</button>
 
-          <div>
-              <div>
-                  <Link href="/login">Login</Link>
-              </div>
-
-              <div>
-                  <Link href="/signup">Signup</Link>
-              </div>
-          </div>
         
         <div>Take quizzes</div>
 
