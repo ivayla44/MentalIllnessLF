@@ -1,9 +1,10 @@
-
-import { useState } from 'react';
+import {useState} from 'react';
+import {useRouter} from "next/router";
 
 const Login = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+    const router = useRouter();
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
     try {
@@ -24,9 +25,12 @@ const Login = () => {
 
         // Redirect to a protected route or homepage
         // You can use Next.js router for navigation
-        // Example: router.push('/dashboard');
+        await router.push('/');
+
+
       } else {
         console.error('Login failed');
+
         // Handle login failure (e.g., display an error message)
       }
     } catch (error) {

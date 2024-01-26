@@ -21,8 +21,7 @@ const dbPromise = (async () => {
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL,
-                email TEXT NOT NULL,
-                illnesses TEXT NOT NULL
+                password TEXT NOT NULL
             )
         `);
 

@@ -1,5 +1,8 @@
 import {db} from "@/lib/db";
 import {useState} from "react";
+import jwt from "jsonwebtoken";
+
+const SECRET_KEY = 'iva_e_mnogo_qka'; // Set a secret key for JWT
 
 function createPost() {
     const [title, setTitle] = useState("");
@@ -23,7 +26,7 @@ function createPost() {
                     },
                     body: JSON.stringify({title, content})
                 });
-                const post = await res.json();
+                // const post = await res.json();
             }}>Create post</button>
         </form>
         </div>
@@ -33,14 +36,6 @@ function createPost() {
 export default function Home({myPosts, friendsPosts}) {
   return (
       <div>
-        <h1>Home Page</h1>
-        <Link href="/login">
-            <a>Login</a>
-        </Link>
-        <br />
-        <Link href="/signup">
-            <a>Signup</a>
-        </Link>
 
         <div>Take quizzes</div>
 
@@ -79,10 +74,15 @@ export default function Home({myPosts, friendsPosts}) {
 
 export async function getServerSideProps(context) {
     // TODO: shte vidim kak shte vzimame id-tata, ig nqkakuv session/cookie-ta not sure yet
-    const { currentUserID } = context.req.session || {};
 
     try {
-        if (!currentUserID) {
+        const token = localStorage.getItem("token") || {};
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const userId = decoded.userId || {};
+
+        if (!userId) {
+            console.log("Redirecting to login page...");
+
             return {
                 redirect: {
                     destination: '/login',
@@ -95,14 +95,14 @@ export async function getServerSideProps(context) {
         SELECT *
         FROM posts
         WHERE user_id = ?;
-    `, [currentUserID]);
+    `, [userId]);
 
         const friendsPosts = await db.get(`
         SELECT posts.*
         FROM posts
         INNER JOIN friendships ON (friendships.user_id = posts.user_id OR friendships.friend_id = posts.user_id)
         WHERE friendships.user_id = ? OR friendships.friend_id = ?;
-    `, [currentUserID, currentUserID]);
+    `, [userId, userId]);
 
         return {
             props: {

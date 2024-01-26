@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   const { username, password } = req.body;
 
   // Validate username and password (add more validation as needed)
-
+  console.log(username, password);
   // Hash the password before storing it in the database
   const hashedPassword = bcrypt.hashSync(password, 10); // 10 is the salt rounds
 

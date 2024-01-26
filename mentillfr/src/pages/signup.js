@@ -1,9 +1,11 @@
-
 import { useState } from 'react';
+import {useRouter} from "next/router";
 
 const Signup = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+    const router = useRouter(); // Get the router instance
+
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
 
   const handleSignup = async () => {
     try {
@@ -18,12 +20,9 @@ const Signup = () => {
       if (response.ok) {
         // Assuming the backend returns a success message
         const { message } = await response.json();
-
-        // Redirect to the login page or handle success as needed
-        // You can use Next.js router for navigation
-        // Example: router.push('/login');
+          await router.push("/login");
       } else {
-        console.error('Signup failed');
+    console.error('Signup failed');
         // Handle signup failure (e.g., display an error message)
       }
     } catch (error) {
