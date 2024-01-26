@@ -18,10 +18,10 @@ const Signup = () => {
       });
 
       if (response.ok) {
-        const { message } = await response.json();
+          await response.json();
           await router.push("/login");
       } else {
-    console.error('Signup failed');
+          console.error('Signup failed');
       }
     } catch (error) {
       console.error('Error during signup:', error);

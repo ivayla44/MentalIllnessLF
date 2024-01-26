@@ -29,24 +29,24 @@ const SearchPage = () => {
 
   return (
     <div>
-      <h1>User Search</h1>
-      <input
+        <h1>User Search</h1>
+        <input
         type="text"
         placeholder="Search for users"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-      />
-      <button onClick={handleSearch}>Search</button>
+        />
+        <button onClick={handleSearch}>Search</button>
 
-      <ul>
-        {searchResults.map(user => (
-          <li key={user.id}>
-            <Link href={`/user/${user.id}`}>
-              <a>{user.username}</a>
-            </Link>
-          </li>
-        ))}
-      </ul>
+        <ul>
+            {searchResults.map(user => (
+                <li key={user.id}>
+                    <Link href="/user/[userId]" as={`/user/${user.id}`}>
+                        {user.username}
+                    </Link>
+                </li>
+            ))}
+        </ul>
     </div>
   );
 };

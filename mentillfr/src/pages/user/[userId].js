@@ -1,6 +1,6 @@
 // pages/user/[userId].js
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import {db} from "@/lib/db";
 
 const UserProfilePage = ({ user, areFriends }) => {
   const router = useRouter();
@@ -22,23 +22,33 @@ const UserProfilePage = ({ user, areFriends }) => {
 export default UserProfilePage;
 
 export async function getServerSideProps(context) {
+  const { req } = context;
+  const protocol = req.connection.encrypted ? 'https' : 'http';
+  const baseUrl = `${protocol}://${req.headers.host}`;
   const { userId } = context.query;
-  const currentUserID = context.req.session.currentUserID;
+  const currentUserID = req.cookies.user;
+
 
   try {
-    // Check if the user is already a friend using the API endpoint
-    const response = await fetch(`/api/areFriends?user1Id=${currentUserID}&user2Id=${userId}`);
+
+    const response = await fetch(`${baseUrl}/api/areFriends?user1Id=${currentUserID}&user2Id=${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+
     const data = await response.json();
     const areFriends = data.areFriends;
 
-    // Continue with other logic as needed
-    // ...
+    const user = await db.get('SELECT id, username FROM users WHERE id = ?', [userId]);
 
     return {
       props: {
         user: {
-          id: userId, // Adjust this based on your actual user data
-          username: 'ExampleUsername', // Adjust this based on your actual user data
+          id: userId,
+          username: user.username,
         },
         areFriends,
       },

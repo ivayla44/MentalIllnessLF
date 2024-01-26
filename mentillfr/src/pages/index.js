@@ -38,15 +38,6 @@ const Post = ({ post }) => {
     );
 };
 
-const friendPost = ({ post }) => {
-    return (
-        <div className="post-container">
-            <h3>{post.title}</h3>
-            <p>{post.content}</p>
-        </div>
-    );
-};
-
 function createPost({userId}) {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
@@ -135,10 +126,16 @@ export default function Home({userId, myPosts, friendsPosts}) {
               {friendsPosts !== null ? (
                   Array.isArray(friendsPosts) ? (
                       friendsPosts.map((post) => (
-                          <friendPost key={post.id} post={post} />
+                          <div className="post-container">
+                              <h3>{post.title}</h3>
+                              <p>{post.content}</p>
+                          </div>
                       ))
                   ) : (
-                        <friendPost key={friendsPosts.id} post={friendsPosts} />
+                      <div className="post-container">
+                          <h3>{friendsPosts.title}</h3>
+                          <p>{friendsPosts.content}</p>
+                      </div>
                   )
               ) : (
                   <p>No feed posts available.</p>
