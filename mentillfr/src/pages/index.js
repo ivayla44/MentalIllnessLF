@@ -1,8 +1,51 @@
 import {db} from "@/lib/db";
 import {useState} from "react";
+import Link from "next/link";
+import {useRouter} from "next/router";
 
 const users = {}
 
+const Post = ({ post }) => {
+    const handleDelete = async () => {
+        try {
+            const response = await fetch(`/api/delete_post/`, {
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({id: post.id}),
+            });
+
+            if (response.ok) {
+                console.log('Post deleted successfully');
+                // You may want to update state or re-fetch posts after deletion
+            } else {
+                console.error('Error deleting post');
+            }
+        } catch (error) {
+            console.error('Error during delete:', error);
+        }
+    };
+
+    return (
+        <div className="post-container">
+            <h3>{post.title}</h3>
+            <p>{post.content}</p>
+            <button className="delete-button" onClick={handleDelete}>
+                Delete Post
+            </button>
+        </div>
+    );
+};
+
+const friendPost = ({ post }) => {
+    return (
+        <div className="post-container">
+            <h3>{post.title}</h3>
+            <p>{post.content}</p>
+        </div>
+    );
+};
 
 function createPost({userId}) {
     const [title, setTitle] = useState("");
@@ -10,7 +53,6 @@ function createPost({userId}) {
 
     return (
         <div>
-        <h1>Create post</h1>
         <form>
             <label htmlFor="title">Title</label>
             <input type="text" id="title" name="title" onChange={event => setTitle(event.target.value)} value={title}/>
@@ -18,7 +60,8 @@ function createPost({userId}) {
             <label htmlFor="content">Content</label>
             <textarea id="content" name="content" onChange={event => setContent(event.target.value)} value={content}/>
 
-            <button type="submit" onClick={ async () => {
+            <button type="submit" onClick={ async (event) => {
+                event.preventDefault();
                 const res = await fetch("/api/create_post", {
                     method: "POST",
                     headers: {
@@ -39,6 +82,13 @@ function createPost({userId}) {
 }
 
 export default function Home({userId, myPosts, friendsPosts}) {
+    const [searchQuery, setSearchQuery] = useState("");
+    const router = useRouter();
+
+    const handleSearch = () => {
+        router.push(`/search?query=${searchQuery}`).then(r => console.log("Navigated to search page"));
+    };
+
   return (
       <div>
 
@@ -51,36 +101,29 @@ export default function Home({userId, myPosts, friendsPosts}) {
         />
         <button onClick={handleSearch}>Search</button>
 
-        <br />
-        
-        {/* Links to login and signup */}
-        <Link href="/login">
-            <a>Login</a>
-        </Link>
-        <br />
-        <Link href="/signup">
-            <a>Signup</a>
-        </Link>
+          <div>
+              <div>
+                  <Link href="/login">Login</Link>
+              </div>
+
+              <div>
+                  <Link href="/signup">Signup</Link>
+              </div>
+          </div>
         
         <div>Take quizzes</div>
 
         <div>{createPost({ userId })}</div>
 
       <h2>View my posts</h2>
-          <div>
+          <div className="post-section">
               {myPosts !== null ? (
                   Array.isArray(myPosts) ? (
                       myPosts.map((post) => (
-                          <div key={post.id}>
-                              <div>{post.title}</div>
-                              <div>{post.content}</div>
-                          </div>
+                          <Post key={post.id} post={post} />
                       ))
                   ) : (
-                      <div key={myPosts.id}>
-                          <div>{myPosts.title}</div>
-                          <div>{myPosts.content}</div>
-                      </div>
+                      <Post key={myPosts.id} post={myPosts} />
                   )
               ) : (
                   <p>No posts available.</p>
@@ -92,16 +135,10 @@ export default function Home({userId, myPosts, friendsPosts}) {
               {friendsPosts !== null ? (
                   Array.isArray(friendsPosts) ? (
                       friendsPosts.map((post) => (
-                          <div key={post.id}>
-                              <div>{post.title}</div>
-                              <div>{post.content}</div>
-                          </div>
+                          <friendPost key={post.id} post={post} />
                       ))
                   ) : (
-                      <div key={friendsPosts.id}>
-                          <div>{friendsPosts.title}</div>
-                          <div>{friendsPosts.content}</div>
-                      </div>
+                        <friendPost key={friendsPosts.id} post={friendsPosts} />
                   )
               ) : (
                   <p>No feed posts available.</p>
@@ -123,8 +160,6 @@ export async function getServerSideProps(context) {
         }
         const userId = users[session];
 
-        console.log("User id:", userId, "Session:", session)
-
         if (!userId) {
             console.log("Redirecting to login page...");
             return {
@@ -135,16 +170,13 @@ export async function getServerSideProps(context) {
             };
         }
 
-        const myPosts = await db.get(`
+        const myPosts = await db.all(`
         SELECT *
         FROM posts
         WHERE user_id = ?;
     `, [userId]);
 
-        console.log("My posts:", myPosts);
-        console.log(Array.isArray(myPosts));
-
-        const friendsPosts = await db.get(`
+        const friendsPosts = await db.all(`
         SELECT posts.*
         FROM posts
         INNER JOIN friendships ON (friendships.user_id = posts.user_id OR friendships.friend_id = posts.user_id)

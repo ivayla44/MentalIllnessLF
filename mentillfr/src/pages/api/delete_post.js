@@ -8,10 +8,20 @@ export default async function handler(req, res) {
 
     const { id } = req.body;
 
-    const { lastID } = await db.run(`
-        DELETE FROM posts
-        WHERE id = ?
+    try {
+        // Execute the DELETE query
+        const { changes } = await db.run(`
+      DELETE FROM posts
+      WHERE id = ?
     `, [id]);
 
-    res.json({ message: "Post deleted successfully.", id: lastID });
+        if (changes > 0) {
+            res.json({ message: "Post deleted successfully.", id });
+        } else {
+            res.status(404).json({ message: "Post not found." });
+        }
+    } catch (error) {
+        console.error("Error deleting post:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
 }
