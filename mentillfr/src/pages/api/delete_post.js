@@ -9,7 +9,6 @@ export default async function handler(req, res) {
     const { id } = req.body;
 
     try {
-        // Execute the DELETE query
         const { changes } = await db.run(`
       DELETE FROM posts
       WHERE id = ?

@@ -17,7 +17,6 @@ const Post = ({ post }) => {
 
             if (response.ok) {
                 console.log('Post deleted successfully');
-                // You may want to update state or re-fetch posts after deletion
             } else {
                 console.error('Error deleting post');
             }

@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   const { username, password } = req.body;
 
-  // Validate credentials and retrieve user data
+  // validate credentials and retrieve user data
   const user = await db.get('SELECT * FROM users WHERE username = ?', [username]);
 
   if (!user || !bcrypt.compareSync(password, user.password)) {

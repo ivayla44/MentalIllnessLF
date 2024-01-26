@@ -13,7 +13,6 @@ const UserProfilePage = ({ user, areFriends, currentUser }) => {
       });
 
       if (response.ok) {
-        // Assuming the friend request was successful, you might want to update the UI accordingly
         console.log('Friend request sent successfully');
       } else {
         console.error('Friend request failed');
